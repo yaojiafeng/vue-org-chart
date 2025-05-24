@@ -1,0 +1,47 @@
+{
+  "name": "vue-org-chart",
+  "version": "1.0.0",
+  "description": "A Vue.js 2.7 organization chart component",
+  "main": "lib/vue-org-chart.umd.js",
+  "module": "lib/vue-org-chart.esm.js",
+  "files": [
+    "lib",
+    "src"
+  ],
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "lib": "vue-cli-service build --target lib --name vue-org-chart src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yaojiafeng/vue-org-chart.git"
+  },
+  "keywords": [
+    "vue",
+    "organization-chart",
+    "org-chart",
+    "tree",
+    "component"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yaojiafeng/vue-org-chart/issues"
+  },
+  "homepage": "https://github.com/yaojiafeng/vue-org-chart#readme",
+  "peerDependencies": {
+    "vue": "^2.7.16"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^4.5.19",
+    "@vue/cli-plugin-eslint": "^4.5.19",
+    "@vue/cli-service": "^4.5.19",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^6.8.0",
+    "eslint-plugin-vue": "^6.2.2",
+    "vue": "^2.7.16",
+    "vue-template-compiler": "^2.7.16"
+  }
+}
