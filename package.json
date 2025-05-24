@@ -43,5 +43,12 @@
     "eslint-plugin-vue": "^6.2.2",
     "vue": "^2.7.16",
     "vue-template-compiler": "^2.7.16"
+  },
+  "dependencies": {
+    "dom-to-image": "^2.6.0",
+    "jquery": "^3.7.1",
+    "orgchart": "^5.0.0",
+    "sass": "^1.89.0",
+    "sass-loader": "^10.5.2"
   }
 }
