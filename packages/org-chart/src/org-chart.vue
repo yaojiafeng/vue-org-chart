@@ -5,7 +5,6 @@
 
 <script>
 import './css/jquery.orgchart.css'
-import './css/style.css'
 // import domtoimage from 'dom-to-image'
 import $ from 'jquery'
 import 'orgchart'
