@@ -9,8 +9,8 @@
  * http://www.opensource.org/licenses/MIT
  */
 
-/* chart styles */
-.orgchart {
+ /* chart styles */
+ .orgchart {
   box-sizing: border-box;
   display: inline-block;
   -webkit-touch-callout: none;
@@ -19,20 +19,17 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  /* background-image: linear-gradient(to top, rgba(200, 0, 0, 0.15) 5%, rgba(0, 0, 0, 0) 5%),
-    linear-gradient(to right, rgba(200, 0, 0, 0.15) 5%, rgba(0, 0, 0, 0) 5%),
-    linear-gradient(to bottom, rgba(200, 0, 0, 0.15) 5%, rgba(0, 0, 0, 0) 5%),
-    linear-gradient(to left, rgba(200, 0, 0, 0.15) 5%, rgba(0, 0, 0, 0) 5%); */
-  background-size: 10px 10px;
-  /* background square size */
-  /* padding: 30px; */
-  /* padding-left: 0; */
+  background-image: linear-gradient(to top, rgba(200, 0, 0, 0.15) 5%, rgba(0, 0, 0, 0) 5%),
+  linear-gradient(to right, rgba(200, 0, 0, 0.15) 5%, rgba(0, 0, 0, 0) 5%),
+  linear-gradient(to bottom, rgba(200, 0, 0, 0.15) 5%, rgba(0, 0, 0, 0) 5%),
+  linear-gradient(to left, rgba(200, 0, 0, 0.15) 5%, rgba(0, 0, 0, 0) 5%);
+  background-size: 10px 10px; /* background square size */
+  padding: 20px 20px 0 20px;
   /* border: 0.5px solid rgba(200, 0, 0, 0.15); */
 }
 
-.orgchart .hidden,
-.orgchart~.hidden {
-  display: none !important;
+.orgchart .hidden, .orgchart~.hidden {
+  display: none!important;
 }
 
 .orgchart.b2t {
@@ -53,7 +50,7 @@
   text-align: center;
 }
 
-.orgchart~.mask {
+.orgchart ~ .mask {
   position: absolute;
   top: 0;
   right: 0;
@@ -61,17 +58,17 @@
   left: 0;
   z-index: 999;
   text-align: center;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0,0,0,0.3);
 }
 
-.orgchart~.mask .spinner {
+.orgchart ~ .mask .spinner {
   position: absolute;
   top: calc(50% - 50px);
   left: calc(50% - 50px);
 }
 
-.orgchart>.spinner::before,
-.orgchart~.mask .spinner::before {
+.orgchart > .spinner::before,
+.orgchart ~ .mask .spinner::before {
   width: 100px;
   height: 100px;
   border-width: 10px;
@@ -97,18 +94,17 @@
 .orgchart .hierarchy::before {
   content: "";
   position: absolute;
-  top: -21px;
+  top: -11px; /* -(background square size + half width of line) */
   left: 0;
   width: 100%;
-  border-top: 1px solid #47A7F3;
+  border-top: 2px solid rgba(217, 83, 79, 0.8);
   box-sizing: border-box;
 }
 
 /* 本姓人与上一层父母的连线，借助伪元素::before实现 */
 /* 处理同一层中特殊的首节点 */
 .orgchart .couple:first-child:not(:only-child)::before {
-  width: calc(100% - 69px);
-  /* half width of hierarchy - half width of node - node's padding - node's border width */
+  width: calc(100% - 69px); /* half width of hierarchy - half width of node - node's padding - node's border width */
   left: 69px;
 }
 
@@ -119,10 +115,8 @@
 }
 
 .orgchart .hierarchy.couple:only-child::before {
-  width: 142px;
-  /* half of node's width + link's width */
-  left: calc(50% - 71px);
-  /* half width of node - half of link width */
+  width: 142px; /* half of node's width + link's width */
+  left: calc(50% - 71px); /* half width of node - half of link width */
 }
 
 /* 在family tree中，一个夫妻组合里，本姓人只有一个，外姓人可能有多个 */
@@ -130,7 +124,7 @@
 .orgchart .hierarchy.spouse:not(.couple)::after {
   content: "";
   position: absolute;
-  border-top: 1px solid #47A7F3;
+  border-top: 2px solid rgba(217, 83, 79, 0.8);
   box-sizing: border-box;
   z-index: 0;
   top: 24px;
@@ -143,94 +137,102 @@
   white-space: nowrap;
 }
 
-.orgchart .couple:has(> .nodes)>.node:first-child::after {
+.orgchart .couple:has(> .nodes) > .node:first-child::after {
   content: "";
   position: absolute;
   top: 24px;
   left: calc(100% + 1px);
-  width: 1px;
+  width: 2px;
   height: 33px;
-  background-color: #47A7F3;
+  background-color: rgba(217, 83, 79, 0.8);
 }
-
 .orgchart .couple::after {
   content: "";
   position: absolute;
-  border-top: 1px solid #47A7F3;
+  border-top: 2px solid rgba(217, 83, 79, 0.8);
   box-sizing: border-box;
   z-index: 0;
   top: 24px;
   width: 20px;
-  left: calc(50% - 10px);
-  /* half of hierarchy - node's padding width - node's border with */
+  left: calc(50% - 10px); /* half of hierarchy - node's padding width - node's border with */
 }
 
 .orgchart .hierarchy:first-child::before,
 .orgchart .hierarchy.isSiblingsCollapsed.left-sibs::before {
-  left: calc(50% - 0.5px);
-  width: calc(50% + 0.5px);
+  left: calc(50% - 1px);
+  width: calc(50% + 1px);
 }
 
 .orgchart .hierarchy:last-child::before,
 .orgchart .hierarchy.isSiblingsCollapsed.right-sibs::before {
-  width: calc(50% + 0.5px);
+  width: calc(50% + 1px);
 }
 
 .orgchart .hierarchy:not(.hidden):not(.spouse):only-child::before {
-  width: 1px;
+  width: 2px;
+}
+
+.orgchart > .nodes > .hierarchy::before,
+.orgchart .isSiblingsCollapsed:not(.left-sibs):not(.right-sibs)::before,
+.orgchart .isSiblingsCollapsed.left-sibs.right-sibs::before,
+.orgchart .isSiblingsCollapsed.right-sibs:first-child:before,
+.orgchart .isSiblingsCollapsed.left-sibs:last-child:before,
+.orgchart .isCollapsedSibling::before,
+.orgchart .isCollapsedSibling .hierarchy::before,
+.orgchart .hierarchy.isChildrenCollapsed:not(.couple) > .node:has(+ .nodes)::after,
+.orgchart .isCollapsedDescendant::before,
+.orgchart .isCollapsedDescendant > .node::before,
+.orgchart .isCollapsedDescendant > .node::after,
+.orgchart .isAncestorsCollapsed:only-child::before,
+.orgchart .isAncestorsCollapsed > .node:not(.outsider)::before {
+  content: none;
 }
 
 /* excluding leaf node */
-.orgchart .hierarchy:not(.couple)>.node:has(+ .nodes)::after {
+.orgchart .hierarchy:not(.couple) > .node:has(+ .nodes)::after {
   content: "";
   position: absolute;
-  bottom: -22px;
-  left: calc(50% - 0.5px);
-  width: 1px;
-  height: 20px;
-  background-color: #47A7F3;
+  bottom: -12px; /* -(background square size + node's border width) */
+  left: calc(50% - 1px);
+  width: 2px;
+  height: 10px; /* background square size */
+  background-color: rgba(217, 83, 79, 0.8);
 }
 
 .orgchart ul li .node.allowedDrop {
   border-color: rgba(68, 157, 68, 0.9);
 }
-
 .orgchart ul li .node.currentDropTarget {
   background-color: rgba(68, 157, 68, 0.9);
 }
-
 .orgchart ul li .node.selected {
-  /* background-color: rgba(238, 217, 54, 0.5); */
-  background: #ffffff96;
+  background-color: rgba(238, 217, 54, 0.5);
 }
-
 .orgchart ul li .node:hover {
-  /* background-color: rgba(238, 217, 54, 0.5); */
-  background: #ffffff96;
+  background-color: rgba(238, 217, 54, 0.5);
 }
-
 /* excluding root node */
-.orgchart>ul>li>ul li>.node:not(.outsider)::before {
+.orgchart > ul > li > ul li > .node:not(.outsider)::before {
   content: "";
   position: absolute;
-  top: var(--top, -22px);
-  left: calc(50% - 0.5px);
-  width: 1px;
-  height: var(--height, 20px);
-  background-color: #47A7F3;
+  top: var(--top, -12px); /* -(fallback value = background square size + border width of node) */ 
+  left: calc(50% - 1px);
+  width: 2px;
+  height: var(--height, 10px); /* fallback value = background square size */
+  background-color: rgba(217, 83, 79, 0.8);
 }
 
-.orgchart>ul>li>ul li>.node.outsider::before {
+.orgchart > ul > li > ul li > .node.outsider::before {
   content: "";
   position: absolute;
   top: var(--top, -12px);
-  left: calc(50% - 0.5px);
+  left: calc(50% - 1px);
   width: 0;
   height: var(--height, 10px);
-  border-right: 1px dotted #47A7F3;
+  border-right: 2px dotted rgba(217, 83, 79, 0.8);
 }
 
-.orgchart>ul>li>ul .isSiblingsCollapsed>.node::before {
+.orgchart > ul > li > ul .isSiblingsCollapsed > .node::before {
   top: var(--top-cross-point, -12px);
   height: var(--height-cross-point, 10px);
 }
@@ -240,33 +242,28 @@
   box-sizing: border-box;
   display: inline-block;
   position: relative;
-  margin: 0 0 40px 0;
-  /* 增加下边距20px */
+  margin: 0 0 20px 0;
   padding: 3px;
   border: 2px dashed transparent;
   text-align: center;
-  transition: transform 0.3s, opacity 0.3s, border-color 0.3s;
-  /* z-index: 1; */
+  transition: transform 0.3s, opacity 0.3s;
+  z-index: 1;
 }
 
-.orgchart.l2r .node,
-.orgchart.r2l .node {
+.orgchart.l2r .node, .orgchart.r2l .node {
   width: 50px;
   height: 140px;
 }
 
 .orgchart .node:hover {
-  /* background-color: rgba(238, 217, 54, 0.5); */
+  background-color: rgba(238, 217, 54, 0.5);
   transition: .5s;
   cursor: default;
   z-index: 2;
-  border-color: #FB6547;
-  background: #ffffff96;
 }
 
 .orgchart .node.focused {
-  /* background-color: rgba(238, 217, 54, 0.5); */
-  background: #ffffff96;
+  background-color: rgba(238, 217, 54, 0.5);
 }
 
 .orgchart .ghost-node {
@@ -284,13 +281,13 @@
   border-color: rgba(68, 157, 68, 0.9);
 }
 
-.orgchart .node>.spinner {
+.orgchart .node > .spinner {
   position: absolute;
   top: calc(50% - 1rem);
   left: calc(50% - 1rem);
 }
 
-.orgchart .node>.spinner::before {
+.orgchart .node > .spinner::before {
   width: 2rem;
   height: 2rem;
   border-width: 0.2rem;
@@ -301,23 +298,19 @@
 }
 
 .orgchart .node .title {
-  display: flex;
-  align-items: center;
   box-sizing: border-box;
-  width: 180px;
-  text-align: left;
-  height: auto;
-  min-height: 54px;
-  padding: 8px 9px;
-  /* border-radius: 4px 4px 0 0; */
-  border-radius: 0.83px 0.83px 0 0;
-  word-wrap: break-word;
-  white-space: normal;
-  overflow-wrap: break-word;
-  font-family: PingFangSC-Regular;
-  font-weight: 400;
-  font-size: 15px;
-  color: #000000;
+  width: 130px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  height: 20px;
+  line-height: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background-color: rgba(217, 83, 79, 0.8);
+  color: #fff;
+  border-radius: 4px 4px 0 0; 
 }
 
 .orgchart.b2t .node .title {
@@ -349,11 +342,13 @@
 
 .orgchart .node .content {
   box-sizing: border-box;
-  width: 180px;
-  height: 54px;
-  font-size: 13px;
-  box-shadow: 0 2px 10px 0 #0000000d;
-  border-radius: 2px;
+  width: 130px;
+  height: 20px;
+  line-height: 20px;
+  font-size: 10px;
+  border: 1px solid rgba(217, 83, 79, 0.8);
+  border-width: 0 1px 1px 1px;
+  border-radius: 0 0 0.25rem 0.25rem;
   text-align: center;
   background-color: #fff;
   color: #333;
@@ -385,7 +380,7 @@
 }
 
 .orgchart .node .edge::before {
-  border-color: #47A7F3;
+  border-color: rgba(68, 157, 68, 0.5);
 }
 
 .orgchart.noncollapsable .node .edge {
@@ -397,37 +392,22 @@
 }
 
 .orgchart .edge:hover::before {
-  border-color: #47A7F3;
+  border-color: #449d44;
 }
 
 .orgchart .node .verticalEdge {
-  width: calc(100% - 6px);
-  /* node top half's width */
-  height: 10px;
-  /* background square's size */
-  left: 3px;
-  /* node's padding value */
+  width: calc(100% - 6px); /* node top half's width */
+  height: 10px; /* background square's size */
+  left: 3px; /* node's padding value */
 }
 
 .orgchart .node .verticalEdge::before {
   position: absolute;
-  left: calc(50% - 5px);
-  /* 50% width of node - half width of up arrow icon) */
+  left: calc(50% - 5px); /* 50% width of node - half width of up arrow icon) */
 }
 
-.orgchart .node .topEdge,
-.orgchart .node .leftEdge,
-.orgchart .node .rightEdge {
-  display: none !important;
-}
-
-/* 确保底部箭头正常显示 */
-.orgchart .node .bottomEdge {
-  display: block !important;
-  position: absolute;
-  left: 50%;
-  bottom: -2px;
-  transform: translateX(-50%);
+.orgchart .node .topEdge {
+  top: -2px;
 }
 
 .orgchart .node .topEdge.oci-chevron-up::before {
@@ -436,6 +416,10 @@
 
 .orgchart .node .topEdge.oci-chevron-down::before {
   bottom: 3px;
+}
+
+.orgchart .node .bottomEdge {
+  bottom: -2px; /* -(node's border-width) */
 }
 
 .orgchart .node .bottomEdge.oci-chevron-up::before {
@@ -449,8 +433,7 @@
 .orgchart .node .horizontalEdge {
   width: 10px;
   height: calc(100% - 6px);
-  top: 3px;
-  /* node's padding */
+  top: 3px; /* node's padding */
 }
 
 .orgchart .node .rightEdge {
@@ -484,22 +467,21 @@
 
 .orgchart .node .toggleBtn {
   position: absolute;
-  left: -2px;
-  /* -(border width of node) */
+  left: -2px; /* -(border width of node) */
   bottom: -2px;
   width: 16px;
   height: 16px;
 }
 
 .orgchart .node .toggleBtn::before {
-  background-color: #47A7F3;
+  background-color: rgba(68, 157, 68, 0.6);
   position: absolute;
   left: 0;
   bottom: 0;
 }
 
 .orgchart .node .toggleBtn:hover::before {
-  background-color: #47A7F3;
+  background-color: #449d44;
 }
 
 .oc-export-btn {
@@ -512,8 +494,7 @@
   transform: translateY(40px);
 }
 
-.orgchart.l2r .node.slide-down,
-.orgchart.r2l .node.slide-down {
+.orgchart.l2r .node.slide-down, .orgchart.r2l .node.slide-down {
   transform: translateY(130px);
 }
 
@@ -522,8 +503,7 @@
   transform: translateY(-40px);
 }
 
-.orgchart.l2r .node.slide-up,
-.orgchart.r2l .node.slide-up {
+.orgchart.l2r .node.slide-up, .orgchart.r2l .node.slide-up {
   transform: translateY(-130px);
 }
 
@@ -532,8 +512,7 @@
   transform: translateX(130px);
 }
 
-.orgchart.l2r .node.slide-right,
-.orgchart.r2l .node.slide-right {
+.orgchart.l2r .node.slide-right, .orgchart.r2l .node.slide-right {
   transform: translateX(40px);
 }
 
@@ -542,8 +521,7 @@
   transform: translateX(-130px);
 }
 
-.orgchart.l2r .node.slide-left,
-.orgchart.r2l .node.slide-left {
+.orgchart.l2r .node.slide-left, .orgchart.r2l .node.slide-left {
   transform: translateX(-40px);
 }
 
@@ -551,23 +529,19 @@
 
 .orgchart .nodes.vertical {
   display: block;
-  padding-left: 52%;
-  margin-right: 92px;
-  /* width of background square*/
+  padding-left: 10px; /* width of background square*/
 }
 
 .orgchart .nodes.vertical .nodes {
   list-style: none;
   display: block;
   margin: 0;
-  padding-left: 101px;
-  /* width of background square*/
+  padding-left: 10px; /* width of background square*/
   text-align: left;
 }
 
 .orgchart .nodes.vertical .node {
-  margin-bottom: 20px;
-  /* 增加垂直节点之间的间距，从0改为20px */
+  margin-bottom: 0;
 }
 
 .orgchart .nodes.vertical .hierarchy .node::before,
@@ -585,11 +559,10 @@
   box-sizing: border-box;
   content: '';
   position: absolute;
-  left: -6px;
-  /* -(background square size + half width of line */
-  border-color: #47A7F3;
+  left: -6px; /* -(background square size + half width of line */
+  border-color: rgba(217, 83, 79, 0.8);
   border-style: solid;
-  border-width: 0 0 1px 1px;
+  border-width: 0 0 2px 2px;
 }
 
 .orgchart .nodes.vertical .hierarchy:only-child::before {
@@ -598,54 +571,36 @@
 
 .orgchart .nodes.vertical .hierarchy::before {
   top: 0px;
-  /* 调整回顶部对齐 */
-  height: 56px;
-  /* 增加高度以确保连接 */
-  width: 11px;
-  /* background square size + half width of line */
+  height: 26px; /* node top half's height(25px) + half width of line */
+  width: 11px; /* background square size + half width of line */
 }
 
 .orgchart .nodes.vertical .hierarchy::after {
   bottom: 0;
-  height: calc(100% - 56px);
-  /* 调整计算高度以确保连续性 */
-  /* height of hierarchy - (node top half's height(25px) - half width of line) */
+  height: calc(100% - 24px); /* height of hierarchy - (node top half's height(25px) - half width of line) */
 }
 
 .orgchart .nodes.vertical .hierarchy:last-child::after {
-  border-width: 1px 0 0 0;
+  border-width: 2px 0 0 0;
 }
 
-.orgchart .nodes.vertical .hierarchy:first-child:before {
-  top: -14px;
-  /* 调整回顶部对齐 */
-  height: 70px;
-}
-
-.orgchart .nodes.vertical>.hierarchy:first-child::before {
+.orgchart .nodes.vertical > .hierarchy:first-child::before {
   box-sizing: border-box;
-  top: -14px;
-  /* 保持与水平连接线一致 */
-  height: 70px;
-  /* 增加高度，确保向下延伸 */
-  width: calc(50% + 1px);
-  border-width: 0px 0 0 1px;
+  top: -11px; /* -(background square size + half width of line) */
+  height: 35px; /* node top half's height + node padding + node border width + background square size */
+  width: calc(50% + 2px);
+  border-width: 2px 0 0 2px;
 }
 
-.orgchart .nodes.vertical>.hierarchy:first-child::after {
+.orgchart .nodes.vertical > .hierarchy:first-child::after {
   box-sizing: border-box;
-  top: 56px;
-  /* 向下移动连接点 */
-  width: 11px;
-  border-width: 1px 0 0 1px;
+  top: 24px; /* node bottom half's height(25px) - half border width of line */
+  width: 11px; /* backgroud square size + half border width of line */
+  border-width: 2px 0 0 2px;
 }
 
-.orgchart .nodes.vertical>.hierarchy:first-child:last-child::after {
-  border-width: 1px 0 0 0;
-}
-
-.orgchart .nodes.vertical .hierarchy:last-child::after {
-  border-width: 1px 0 0 0;
+.orgchart .nodes.vertical > .hierarchy:first-child:last-child::after {
+  border-width: 2px 0 0 0;
 }
 
 /* styles for compact nodes */
@@ -663,19 +618,19 @@
   height: unset;
 }
 
-.orgchart .node.compact>.node {
+.orgchart .node.compact > .node {
   display: none;
 }
 
-.orgchart .node.compact.looseMode>.node {
+.orgchart .node.compact.looseMode > .node {
   display: inline-block;
 }
 
-.orgchart .node.compact>.node.compact {
+.orgchart .node.compact > .node.compact {
   position: relative;
 }
 
-.orgchart .node.compact>.node.compact.looseMode {
+.orgchart .node.compact > .node.compact.looseMode {
   display: grid;
 }
 
@@ -689,15 +644,15 @@
   background-color: #fff;
 }
 
-.orgchart .node.compact.even>.node:hover,
-.orgchart .node.compact.even>.node.focused,
-.orgchart .node.compact.even>.node.selected {
+.orgchart .node.compact.even > .node:hover,
+.orgchart .node.compact.even > .node.focused,
+.orgchart .node.compact.even > .node.selected {
   background-color: #fff;
 }
 
-.orgchart .node.compact.odd>.node:hover,
-.orgchart .node.compact.odd>.node.focused,
-.orgchart .node.compact.odd>.node.selected {
+.orgchart .node.compact.odd > .node:hover,
+.orgchart .node.compact.odd > .node.focused,
+.orgchart .node.compact.odd > .node.selected {
   background-color: #eee;
 }
 
@@ -705,34 +660,34 @@
   top: var(--top-cross-point, -10px);
 }
 
-.orgchart .node.compact>.content {
+.orgchart .node.compact > .content {
   position: absolute;
   top: 25px;
   left: 5px;
 }
 
-.orgchart .node.compact.looseMode>.title {
+.orgchart .node.compact.looseMode > .title {
   margin-top: 5px;
   margin-left: 5px;
 }
 
-.orgchart .node.compact.looseMode>.content {
+.orgchart .node.compact.looseMode > .content {
   top: 30px;
   left: 10px;
 }
 
-.orgchart .node.compact>.node.compact.looseMode>.title {
+.orgchart .node.compact > .node.compact.looseMode > .title {
   margin-top: 5px;
   margin-left: 5px;
 }
 
-.orgchart .node.compact>.node.compact>.content {
+.orgchart .node.compact > .node.compact > .content {
   position: absolute;
   top: 23px;
   left: 3px;
 }
 
-.orgchart .node.compact>.node.compact.looseMode>.content {
+.orgchart .node.compact > .node.compact.looseMode > .content {
   top: 28px;
   left: 8px;
 }
@@ -745,40 +700,39 @@
   content: unset;
 }
 
-.orgchart .backToCompactSymbol,
-.orgchart .backToLooseSymbol {
+.orgchart .backToCompactSymbol, .orgchart .backToLooseSymbol {
   cursor: pointer;
 }
 
-.orgchart .node.compact>.backToCompactSymbol {
+.orgchart .node.compact > .backToCompactSymbol {
   position: absolute;
   top: 5px;
   left: 5px;
 }
 
-.orgchart .node.compact.looseMode>.backToCompactSymbol {
+.orgchart .node.compact.looseMode > .backToCompactSymbol {
   top: 10px;
   left: 10px;
 }
 
-.orgchart .node.compact>.node.compact.looseMode>.backToCompactSymbol {
+.orgchart .node.compact > .node.compact.looseMode > .backToCompactSymbol {
   top: 8px;
   left: 8px;
 }
 
-.orgchart .node.compact>.node.compact>.backToCompactSymbol {
+.orgchart .node.compact > .node.compact > .backToCompactSymbol {
   position: absolute;
   top: 3px;
   left: 3px;
 }
 
-.orgchart .node.compact>.backToLooseSymbol {
+.orgchart .node.compact > .backToLooseSymbol {
   position: absolute;
   top: 25px;
   right: 5px;
 }
 
-.orgchart .node.compact>.node.compact>.backToLooseSymbol {
+.orgchart .node.compact > .node.compact > .backToLooseSymbol {
   position: absolute;
   top: 23px;
   right: 3px;
@@ -808,7 +762,7 @@
   font-family: Arial;
 }
 
-/* .oci-menu::before {
+.oci-menu::before {
   content: "≡";
   display: inline-block;
   width: 1rem;
@@ -817,7 +771,7 @@
   line-height: 1rem;
   color: #000;
   font-size: 1rem;
-} */
+}
 
 .oci-chevron-up::before {
   content: "";
@@ -981,43 +935,7 @@
   from {
     transform: rotate(0deg);
   }
-
   to {
     transform: rotate(360deg);
   }
-}
-
-.orgchart>.nodes>.hierarchy::before,
-.orgchart .isSiblingsCollapsed:not(.left-sibs):not(.right-sibs)::before,
-.orgchart .isSiblingsCollapsed.left-sibs.right-sibs::before,
-.orgchart .isSiblingsCollapsed.right-sibs:first-child:before,
-.orgchart .isSiblingsCollapsed.left-sibs:last-child:before,
-.orgchart .isCollapsedSibling::before,
-.orgchart .isCollapsedSibling .hierarchy::before,
-.orgchart .hierarchy.isChildrenCollapsed:not(.couple)>.node:has(+ .nodes)::after,
-.orgchart .isCollapsedDescendant::before,
-.orgchart .isCollapsedDescendant>.node::before,
-.orgchart .isCollapsedDescendant>.node::after,
-.orgchart .isAncestorsCollapsed:only-child::before,
-.orgchart .isAncestorsCollapsed>.node:not(.outsider)::before {
-  content: none;
-}
-
-/* excluding leaf node */
-
-/* 调整垂直布局中节点的间距 */
-.orgchart .nodes.vertical .node {
-  margin-bottom: 40px;
-  /* 增加垂直间距 */
-}
-
-/* 确保最后一个节点没有多余的下边距 */
-.orgchart .nodes.vertical .node:last-child {
-  margin-bottom: 0;
-}
-
-/* 调整连接线的起始位置 */
-.orgchart .nodes.vertical .hierarchy:first-child {
-  margin-top: 0;
-  /* 重置顶部边距 */
 }
