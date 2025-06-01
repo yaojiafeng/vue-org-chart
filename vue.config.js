@@ -19,8 +19,10 @@ module.exports = {
     // lib目录是组件库最终打包好存放的地方，不需要eslint检查
     config.module
       .rule('eslint')
-      .exclude.add(path.resolve('lib'))
-      .end()
+      .exclude
+        .add(path.resolve('lib'))
+        .add(/node_modules/)
+        .end()
 
     // packages和examples目录需要加入编译
     config.module
@@ -28,9 +30,21 @@ module.exports = {
       .include
         .add('/packages')
         .add('/examples')
+        .add(/node_modules\/orgchart/)
         .end()
       .use('babel')
         .loader('babel-loader')
+        .end()
+
+    // 添加对 orgchart 的处理
+    config.module
+      .rule('orgchart')
+      .test(/jquery\.orgchart\.min\.js$/)
+      .use('babel')
+        .loader('babel-loader')
+        .options({
+          plugins: ['@babel/plugin-transform-modules-commonjs']
+        })
         .end()
   },
   // 强制内联CSS

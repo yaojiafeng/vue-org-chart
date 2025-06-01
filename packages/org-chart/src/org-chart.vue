@@ -1,5 +1,5 @@
 <template>
-  <div ref="chartContainer" class="org-chart-container" :style="{ height: height }">
+  <div ref="chartContainer" class="org-chart-container" :class="{ 'state-owned-asset-role': isStateOwnedAssetRole }" :style="{ height: height }">
     <div class="chart-node-styles" v-if="nodeClassColors" v-html="createNodeStyles"></div>
   </div>
 </template>
@@ -32,7 +32,7 @@ export default {
     // 可见层级
     visibleLevel: {
       type: Number,
-      default: 3
+      default: 4
     },
     // 方向 (t2b, b2t, l2r, r2l)
     direction: {
@@ -51,7 +51,7 @@ export default {
     // 是否可缩放
     zoom: {
       type: Boolean,
-      default: false
+      default: true
     },
     // 是否可展开/折叠
     toggleSiblingsResp: {
@@ -85,8 +85,7 @@ export default {
   },
   data() {
     return {
-      chart: null,
-      observer: null
+      chart: null
     }
   },
   computed: {
@@ -111,9 +110,19 @@ export default {
       return styles
     }
   },
+  mounted() {
+    this.$nextTick(() => {
+      this.initOrgChart()
+    })
+  },
   methods: {
     // 创建节点操作按钮的公共方法
     createNodeOperations($node, data, self) {
+      // 如果是国资委角色，直接返回，不创建任何操作按钮
+      if (self.isStateOwnedAssetRole) {
+        return
+      }
+
       // 创建操作按钮容器
       const operationDiv = $('<div>', {
         class: 'node-operations'
@@ -122,70 +131,67 @@ export default {
       // 判断是否是第一层节点
       const isFirstLevel = data.achievementRank === '0'
 
-      // 如果不是国资委角色，才显示按钮
-      if (!self.isStateOwnedAssetRole) {
-        // 非国资委角色的处理逻辑
-        if (isFirstLevel) {
-          // 第一层节点显示新增和编辑按钮
-          const addIcon = $('<i>', {
-            class: 'node-icon node-add-icon sgptfont icon-add icon-with-border',
-            title: '新增',
-            click: function(e) {
-              e.stopPropagation()
-              console.log('添加子节点', data)
-              self.$emit('node-add', data)
-            }
-          })
+      // 非第一层节点显示所有按钮（新增、编辑、删除）
+      if (isFirstLevel) {
+        // 第一层节点显示新增和编辑按钮
+        const addIcon = $('<i>', {
+          class: 'node-icon node-add-icon sgptfont icon-add icon-with-border',
+          title: '新增',
+          click: function(e) {
+            e.stopPropagation()
+            console.log('添加子节点', data)
+            self.$emit('node-add', data)
+          }
+        })
 
-          const editIcon = $('<i>', {
-            class: 'node-icon node-edit-icon sgptfont icon-edit',
-            title: '编辑',
-            click: function(e) {
-              e.stopPropagation()
-              console.log('编辑节点', data)
-              self.$emit('node-edit', data)
-            }
-          })
+        const editIcon = $('<i>', {
+          class: 'node-icon node-edit-icon sgptfont icon-edit',
+          title: '编辑',
+          click: function(e) {
+            e.stopPropagation()
+            console.log('编辑节点', data)
+            self.$emit('node-edit', data)
+          }
+        })
 
-          operationDiv.append(addIcon)
-          operationDiv.append(editIcon)
-        } else {
-          // 非第一层节点显示所有按钮（新增、编辑、删除）
-          const addIcon = $('<i>', {
-            class: 'node-icon node-add-icon sgptfont icon-add icon-with-border',
-            title: '新增',
-            click: function(e) {
-              e.stopPropagation()
-              console.log('添加子节点', data)
-              self.$emit('node-add', data)
-            }
-          })
+        operationDiv.append(addIcon)
+        operationDiv.append(editIcon)
+      } else {
+        // 非第一层节点显示所有按钮（新增、编辑、删除）
+        const addIcon = $('<i>', {
+          class: 'node-icon node-add-icon sgptfont icon-add icon-with-border',
+          title: '新增',
+          click: function(e) {
+            e.stopPropagation()
+            console.log('添加子节点', data)
+            self.$emit('node-add', data)
+          }
+        })
 
-          const editIcon = $('<i>', {
-            class: 'node-icon node-edit-icon sgptfont icon-edit icon-with-border',
-            title: '编辑',
-            click: function(e) {
-              e.stopPropagation()
-              console.log('编辑节点', data)
-              self.$emit('node-edit', data)
-            }
-          })
+        const editIcon = $('<i>', {
+          class: 'node-icon node-edit-icon sgptfont icon-edit icon-with-border',
+          title: '编辑',
+          click: function(e) {
+            e.stopPropagation()
+            console.log('编辑节点', data)
+            self.$emit('node-edit', data)
+          }
+        })
 
-          const deleteIcon = $('<i>', {
-            class: 'node-icon node-delete-icon sgptfont icon-delete',
-            title: '删除',
-            click: function(e) {
-              e.stopPropagation()
-              console.log('删除节点', data)
-              self.$emit('node-delete', data)
-            }
-          })
+        const deleteIcon = $('<i>', {
+          class: 'node-icon node-delete-icon sgptfont icon-delete',
+          title: '删除',
+          click: function(e) {
+            e.stopPropagation()
+            console.log('删除节点', data)
+            self.$emit('node-delete', data)
+          }
+        })
 
-          // 添加所有按钮到容器
-          operationDiv.append(addIcon)
-          operationDiv.append(editIcon)
-          operationDiv.append(deleteIcon)
-        }
+        // 添加所有按钮到容器
+        operationDiv.append(addIcon)
+        operationDiv.append(editIcon)
+        operationDiv.append(deleteIcon)
       }
 
       // 将容器添加到节点
@@ -206,14 +212,14 @@ export default {
           $nodeDiv.attr('data-id', data.id)
         }
         
-        // 移除上、左、右三个方向的箭头，只保留下方箭头
-        $nodeDiv.find('.topEdge').remove()
-        $nodeDiv.find('.leftEdge').remove()
-        $nodeDiv.find('.rightEdge').remove()
+        // 移除加减号按钮
+        $nodeDiv.find('.toggleBtn').remove()
+        $nodeDiv.find('.symbol').remove()
         
         return $nodeDiv
       }
     },
+    
     // 创建图表配置的公共方法
     createChartOptions(customConfig = {}) {
       const self = this
@@ -230,7 +236,19 @@ export default {
         zoom: this.zoom,
         toggleSiblingsResp: this.toggleSiblingsResp,
         chartClass: this.chartClass,
-        nodeClassColors: this.nodeClassColors
+        nodeClassColors: this.nodeClassColors,
+        // 保留加减号按钮的功能，但通过CSS隐藏
+        verticalDepth: this.verticalLevel,
+        toggleBtn: true,
+        parentNodeSymbol: true,
+        showToggleBtn: true,
+        // 添加动画完成的回调
+        'onAfterShowChildren': function($node) {
+          self.updateDescendantsBadge($node)
+        },
+        'onAfterHideChildren': function($node) {
+          self.updateDescendantsBadge($node)
+        }
       }
       
       // 合并自定义配置
@@ -246,6 +264,10 @@ export default {
         // 创建节点操作按钮
         self.createNodeOperations($node, data, self)
         
+        // 移除任何可能存在的加减号按钮
+        $node.find('.toggleBtn').remove()
+        $node.find('.symbol').remove()
+        
         // 为节点的title部分添加点击事件
         $node.find('.title').on('click', function(e) {
           e.stopPropagation() // 阻止事件冒泡
@@ -255,92 +277,55 @@ export default {
           // 触发标题点击事件
           self.$emit('node-title-click', { $node, data })
         })
+
+        // 为子节点数量标记添加点击事件
+        $node.find('.descendants-count').on('click', function(e) {
+          e.stopPropagation()
+          
+          // 获取子节点容器
+          const $childrenUl = $node.siblings('ul')
+          
+          // 检查子节点是否存在
+          if ($childrenUl.length) {
+            const isHidden = $childrenUl.hasClass('hidden') || 
+                           $childrenUl.is(':hidden') || 
+                           $childrenUl.css('display') === 'none'
+            
+            if (isHidden) {
+              // 展开子节点
+              self.showChildren($node)
+            } else {
+              // 收起子节点
+              self.chart.hideChildren($node)
+            }
+          }
+        })
       }
       
-      options.clickNode = function($node, data) {
-        console.log('click node', $node, data)
-        self.$emit('node-click', { $node, data })
-      }
-      
-      // 添加箭头点击事件处理
+      // 修改初始化完成的处理
       options.initCompleted = function() {
         // 应用自定义创建节点方法
         self.customCreateNode(this)
         
-        // 初始化所有节点的后代数量徽章显示状态
-        // 采用更精确的方式检查节点状态
+        // 初始化所有节点的子节点数量徽章显示状态
         $(self.$refs.chartContainer).find('.node').each(function() {
           const $node = $(this)
           const $childrenUl = $node.siblings('ul')
           const $countBadge = $node.find('.descendants-count')
           
           if ($countBadge.length) {
-            // 如果子节点是可见的，确保徽章隐藏
+            // 如果子节点是可见的，隐藏徽章中的文本
             if ($childrenUl.length && 
                 !$childrenUl.hasClass('hidden') && 
                 !$childrenUl.is(':hidden') && 
                 $childrenUl.css('display') !== 'none' && 
                 $childrenUl.css('visibility') !== 'hidden') {
-              $countBadge.hide()
+              $countBadge.addClass('text-hidden').text('')
             } else {
-              // 如果子节点是隐藏的，显示徽章
-              $countBadge.show()
+              // 如果子节点是隐藏的，显示徽章文本
+              $countBadge.removeClass('text-hidden')
             }
           }
-        })
-        
-        // 监听下拉箭头点击事件
-        $(self.$refs.chartContainer).find('.bottomEdge').on('click', function(e) {
-          const $edge = $(this)
-          const $node = $edge.parent()
-          const nodeData = $node.data('nodeData')
-          
-          // 判断子节点当前状态：是展开还是收起
-          const isExpanding = $edge.hasClass('oci-chevron-down') // 向下箭头表示将要展开
-          const isCollapsing = $edge.hasClass('oci-chevron-up') // 向上箭头表示将要收起
-          
-          console.log('点击了下拉箭头', nodeData, isExpanding ? '展开子节点' : '收起子节点')
-          
-          // 发送事件，包含节点信息和操作类型
-          self.$emit('edge-click', { 
-            type: 'bottomEdge', 
-            $edge, 
-            $node, 
-            nodeData,
-            isExpanding,
-            isCollapsing,
-            action: isExpanding ? 'expand' : 'collapse'
-          })
-          
-          // 处理展开/收起状态的变化
-          self.handleNodeExpandCollapse($node, isExpanding)
-        })
-        
-        // 监听toggleBtn点击事件（加减号按钮）
-        $(self.$refs.chartContainer).find('.toggleBtn').on('click', function(e) {
-          const $toggleBtn = $(this)
-          const $node = $toggleBtn.parent()
-          const nodeData = $node.data('nodeData')
-          
-          // 判断是展开还是收起操作
-          const isExpanding = $toggleBtn.hasClass('oci-plus-square') // 加号表示将要展开
-          const isCollapsing = $toggleBtn.hasClass('oci-minus-square') // 减号表示将要收起
-          
-          console.log('点击了垂直节点的加减号按钮', nodeData, isExpanding ? '展开子节点' : '收起子节点')
-          
-          // 发送事件，包含节点信息和操作类型
-          self.$emit('toggle-click', { 
-            type: 'toggleBtn', 
-            $toggleBtn, 
-            $node, 
-            nodeData,
-            isExpanding,
-            isCollapsing,
-            action: isExpanding ? 'expand' : 'collapse'
-          })
-          
-          // 处理展开/收起状态的变化
-          self.handleNodeExpandCollapse($node, isExpanding)
         })
         
         // 为所有展开/收起操作添加MutationObserver来监控DOM变化
@@ -353,21 +338,6 @@ export default {
       }
       
       return options
-    },
-    // 处理节点展开或收起状态变化 
-    handleNodeExpandCollapse($node, isExpanding) {
-      const self = this
-      const $countBadge = $node.find('.descendants-count')
-      
-      // 如果是展开操作，立即隐藏后代数量标记
-      if (isExpanding && $countBadge.length) {
-        $countBadge.hide()
-      }
-      
-      // 在展开/收起动画完成后检查状态并更新显示
-      setTimeout(() => {
-        self.updateDescendantsBadge($node)
-      }, 300) // 增加延迟时间，确保动画完成
     },
     
     // 为图表中的节点设置MutationObserver以监控DOM变化
@@ -386,7 +356,7 @@ export default {
               const $node = $ul.siblings('.node')
               
               if ($node.length) {
-                // 更新该节点的后代数量显示
+                // 更新该节点的子节点数量显示
                 self.updateDescendantsBadge($node)
               }
             }
@@ -408,7 +378,7 @@ export default {
       this.observer = observer
     },
     
-    // 更新所有节点的后代数量徽章显示状态
+    // 更新所有节点的子节点数量徽章显示状态
     updateAllDescendantsBadges() {
       const self = this
       $(this.$refs.chartContainer).find('.node').each(function() {
@@ -417,32 +387,32 @@ export default {
       })
     },
     
-    // 更新单个节点的后代数量徽章显示状态
+    // 更新单个节点的子节点数量徽章显示状态
     updateDescendantsBadge($node) {
       // 获取节点的下一级 ul 元素
       const $childrenUl = $node.siblings('ul')
-      // 获取后代数量标记
+      // 获取子节点数量标记
       const $countBadge = $node.find('.descendants-count')
       
       if ($countBadge.length) {
-        // 如果存在后代数量标记，检查子节点的可见性状态
+        // 如果存在子节点数量标记，检查子节点的可见性状态
         const isVisible = $childrenUl.length && 
                          !$childrenUl.hasClass('hidden') && 
                          !$childrenUl.is(':hidden') && 
                          $childrenUl.css('display') !== 'none' && 
                          $childrenUl.css('visibility') !== 'hidden'
         
-        // 子节点可见时隐藏徽章，否则显示徽章
+        // 子节点可见时只显示圆圈不显示数字，否则显示圆圈和数字
         if (isVisible) {
-          $countBadge.hide()
+          $countBadge.addClass('text-hidden').text('')
         } else {
-          $countBadge.show()
+          $countBadge.removeClass('text-hidden').text($countBadge.attr('data-count'))
         }
         
-        console.log('更新节点后代徽章显示状态', {
+        console.log('更新节点子节点数量徽章显示状态', {
           node: $node.find('.title').text(),
           isVisible,
-          shouldShow: !isVisible
+          shouldShowCount: !isVisible
         })
       }
     },
@@ -509,15 +479,32 @@ export default {
           return true
         }
 
-        // 检查是否有 edge 元素
+        // 检查是否有 edge 元素，如果没有则添加
         const $edge = $node.children('.edge')
         if (!$edge.length) {
           // 如果没有 edge 元素，添加一个
           $node.append('<i class="edge verticalEdge bottomEdge no-pointer"></i>')
         }
         
-        // 使用orgchart的原生showChildren方法
-        this.chart.showChildren($node)
+        // 在展开前确保节点已经准备好
+        const nodeData = $node.data('nodeData')
+        if (nodeData && nodeData.children && nodeData.children.length > 0) {
+          // 确保子节点容器存在
+          if (!$childrenUl.length) {
+            const $childNodes = this.chart.buildHierarchy($node, nodeData.children)
+            $node.after($childNodes)
+          }
+        }
+
+        // 使用 setTimeout 来确保 DOM 更新完成
+        setTimeout(() => {
+          // 使用orgchart的原生showChildren方法
+          this.chart.showChildren($node)
+          
+          // 手动触发一次更新
+          this.updateDescendantsBadge($node)
+        }, 0)
+        
         return true
       } catch (error) {
         console.error('展开节点失败:', error)
@@ -551,30 +538,15 @@ export default {
           // 应用节点样式
           this.applyNodeStyles()
           
-          // 查找所有已展开的节点，隐藏它们的徽章
-          $(this.$refs.chartContainer).find('.node').each((index, node) => {
-            const $node = $(node)
-            const $childrenUl = $node.siblings('ul')
-            const $countBadge = $node.find('.descendants-count')
-            
-            // 检查子节点列表是否显示
-            if ($childrenUl.length && 
-                !$childrenUl.hasClass('hidden') && 
-                !$childrenUl.is(':hidden') && 
-                $childrenUl.css('display') !== 'none') {
-              // 子节点已展开，隐藏徽章
-              if ($countBadge.length) {
-                $countBadge.hide()
-              }
-            }
-          })
-          
           // 确保样式被应用到所有节点
           this.ensureNodeStyles()
+          
+          // 查找所有已展开的节点，隐藏它们的数字
+          this.updateAllDescendantsBadges()
+          
+          // 触发已完成事件
+          this.$emit('chart-initialized', this.chart)
         })
-        
-        // 触发已完成事件
-        this.$emit('chart-initialized', this.chart)
       } else {
         console.error('jQuery或OrgChart插件未加载')
       }
@@ -810,7 +782,7 @@ export default {
         // 应用新的缩放比例
         $chart.css({
           'transform': `scale(${newScale})`,
-          'transform-origin': 'center top'
+          'transform-origin': 'left top'
         })
         
         console.log(`图表缩放到指定比例: ${newScale.toFixed(2)}倍`)
@@ -881,7 +853,6 @@ export default {
     if (this.chart) {
       // 移除事件监听
       $(this.$refs.chartContainer).find('.bottomEdge').off('click')
-      $(this.$refs.chartContainer).find('.toggleBtn').off('click')
       
       // 断开MutationObserver的连接
       if (this.observer) {
@@ -899,12 +870,22 @@ export default {
 .org-chart-container {
   position: relative;
   width: fit-content;
-  overflow: scroll !important;
+  min-width: 100%;
+  // overflow: scroll !important;
   display: flex;
   justify-content: center;
   text-align: center;
   background-color: transparent !important;
   margin: 0 auto;
+  padding-top: 52px;
+  /* 隐藏滚动条 - 兼容主流浏览器 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+
+.org-chart-container::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Webkit */
 }
 
 .chart-node-styles {
@@ -918,20 +899,32 @@ export default {
   position: absolute;
   top: -30px;
   left: 3px;
-  display: flex;
+  display: none;
   align-items: center;
-  opacity: 0;
-  transition: opacity 0.2s;
-  z-index: 100;
-  background: #ffffffb3;
-  border: 1px solid #fff;
-  box-shadow: 0 2px 6px 0 #0000001a;
+  /* gap: 0; */
+  z-index: 10999990;
+  background: #FFFFFF;
+  border: 1px solid #E4E7ED;
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.1);
   height: 28px;
   border-radius: 2px;
+  padding: 0 4px;
+}
+
+:deep(.node-operations::before) {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: #FFFFFF;
+  z-index: -1;
+  border-radius: 3px;
 }
 
 :deep(.orgchart .node:hover .node-operations) {
-  opacity: 1;
+  display: flex;
 }
 
 :deep(.node-icon) {
@@ -953,6 +946,13 @@ export default {
 /* 为节点标题添加鼠标指针样式 */
 :deep(.orgchart .node .title) {
   cursor: pointer;
+  /* 强制英文字母和数字也自动换行 */
+  word-break: break-all;
+  line-break: anywhere;
+  hyphens: auto;
+  /* 确保换行属性生效 */
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
 }
 
 /* 添加子节点数量标记的样式 */
@@ -966,15 +966,39 @@ export default {
   border-radius: 50%;
   min-width: 18px;
   min-height: 18px;
+  /* 明确设置最大宽高，防止意外扩大 */
+  max-width: 18px;
+  max-height: 18px;
+  width: 18px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
+  z-index: 5; /* 降低基础z-index，避免遮挡下层节点 */
   border: 1px solid #47A7F3;
   color: #000;
   font-family: PingFangSC-Medium;
   font-weight: 500;
   font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  /* 严格限制圆圈的事件区域，防止遮挡下层节点 */
+  pointer-events: auto;
+  /* 确保圆圈的大小固定，不会意外扩大 */
+  flex-shrink: 0;
+  box-sizing: border-box;
+  /* 添加溢出隐藏，确保内容不会超出边界 */
+  overflow: hidden;
+  /* 确保圆圈不会影响周围布局 */
+  isolation: isolate;
+  /* 严格限制圆圈的影响范围 */
+  contain: layout;
+
+  /* 添加新的样式用于隐藏文本时的状态 */
+  &.text-hidden {
+    background: #fff;
+  }
+
   &:before {
     content: '';
     position: absolute;
@@ -984,10 +1008,136 @@ export default {
     width: 1px;
     height: 10px;
     background-color: #47A7F3;
+    z-index: -1;
+    /* 连线不参与鼠标事件 */
+    pointer-events: none;
   }
+  
+  /* 确保圆圈点击区域严格限制在圆圈内 */
+  &:hover {
+    /* 只在hover时稍微提升层级 */
+    z-index: 10;
+  }
+}
+
+/* 当父节点hover时，提高圆圈的z-index以盖住连线 */
+:deep(.orgchart .node:hover .descendants-count) {
+  z-index: 1050;
+}
+
+/* 国资委角色时，圆圈需要更高的z-index来盖住连线 */
+.org-chart-container.state-owned-asset-role :deep(.descendants-count) {
+  z-index: 1000; /* 国资委角色时稍微提高基础z-index */
 }
 
 :deep(.no-pointer) {
   pointer-events: none;
+}
+
+/* 根本性修复：确保所有节点都有完整的hover区域 */
+:deep(.orgchart .node) {
+  /* 确保每个节点都有完整的hover能力 */
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: auto;
+  
+  /* 清除所有可能干扰hover的元素 */
+  &::before,
+  &::after {
+    pointer-events: none !important;
+  }
+  
+  /* hover时确保最高优先级 */
+  &:hover {
+    z-index: 999 !important;
+    pointer-events: auto !important;
+    
+    .node-operations {
+      display: flex;
+      z-index: 1099;
+    }
+  }
+  
+  /* 确保节点内容完全可交互 */
+  .title,
+  .content {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* 隐藏不需要的元素 */
+  .symbol {
+    display: none !important;
+  }
+  .toggleBtn {
+    display: none !important;
+  }
+  .edge {
+    visibility: hidden !important;
+    pointer-events: none !important;
+    position: absolute !important;
+  }
+}
+
+/* 当isStateOwnedAssetRole为true时，hover状态下连线的层级要低于圆圈 */
+.org-chart-container.state-owned-asset-role :deep(.orgchart) {
+  /* 为连线元素设置较低的z-index，当国资委角色且节点hover时 */
+  .node:hover {
+    &::before,
+    &::after {
+      z-index: 1;
+    }
+  }
+  
+  /* 父节点hover时，影响其下级连线的层级 */
+  .hierarchy:hover {
+    &::before,
+    &::after {
+      z-index: 1;
+    }
+    
+    /* 影响其子节点的连线 */
+    .node::before,
+    .node::after {
+      z-index: 1;
+    }
+  }
+}
+
+/* 确保向下连线能正常显示（修复收起节点后的连线问题） */
+:deep(.orgchart .hierarchy:not(.couple) > .node:has(+ .nodes)::after) {
+  content: "" !important;
+  position: absolute !important;
+  bottom: -22px !important;
+  left: calc(50% - 0.5px) !important;
+  width: 1px !important;
+  height: 20px !important;
+  background-color: #47A7F3 !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+  display: block !important;
+}
+
+/* 确保圆圈到父节点的连线正常显示 */
+:deep(.descendants-count::before) {
+  content: '' !important;
+  position: absolute !important;
+  top: -10px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 1px !important;
+  height: 10px !important;
+  background-color: #47A7F3 !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+  display: block !important;
+}
+
+/* 确保搜索序号圆圈显示在节点之上 */
+:deep(.search-index-circle) {
+  z-index: 10000 !important;
+  position: absolute !important;
+  pointer-events: none !important;
 }
 </style> 

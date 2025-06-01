@@ -2,56 +2,18 @@
   <div id="app">
     <h1>Vue Organization Chart Demo</h1>
     <org-chart
-      :data="orgData"
-      :horizontal="false"
-      :collapsable="true"
-      :label-width="160"
-      :label-height="80"
+      :datasource="orgData"
     />
   </div>
 </template>
 
 <script>
+import { treeData } from './tree'
 export default {
   name: 'App',
   data() {
     return {
-      orgData: {
-        name: 'CEO',
-        title: 'Chief Executive Officer',
-        children: [
-          {
-            name: 'CTO',
-            title: 'Chief Technology Officer',
-            children: [
-              {
-                name: 'Team Lead 1',
-                title: 'Development Team Lead',
-                children: [
-                  { name: 'Developer 1', title: 'Software Developer' },
-                  { name: 'Developer 2', title: 'Software Developer' }
-                ]
-              },
-              {
-                name: 'Team Lead 2',
-                title: 'Development Team Lead',
-                children: [
-                  { name: 'Developer 3', title: 'Software Developer' },
-                  { name: 'Developer 4', title: 'Software Developer' }
-                ]
-              }
-            ]
-          },
-          {
-            name: 'CFO',
-            title: 'Chief Financial Officer',
-            children: [
-              { name: 'Accountant 1', title: 'Senior Accountant' },
-              { name: 'Accountant 2', title: 'Junior Accountant' }
-            ]
-          }
-        ]
-      }
+      orgData: treeData.data
     }
   }
 }
