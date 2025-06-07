@@ -3,6 +3,17 @@
     <h1>Vue Organization Chart Demo</h1>
     <org-chart
       :datasource="orgData"
+      nodeContent="title"
+      :verticalLevel="4"
+      :visibleLevel="4"
+      direction="t2b"
+      :draggable="false"
+      :pan="false"
+      :zoom="zoom"
+      :toggleSiblingsResp="false"
+      chartClass=""
+      :nodeClassColors="{}"
+      height="fit-content"
     />
   </div>
 </template>
@@ -13,8 +24,15 @@ export default {
   name: 'App',
   data() {
     return {
-      orgData: treeData.data
+      orgData: treeData.data,
+      zoom: false
     }
+  },
+  mounted() {
+    setTimeout(() => {
+      this.zoom = true
+      console.log('zoom', this.zoom)
+    }, 5000)
   }
 }
 </script>

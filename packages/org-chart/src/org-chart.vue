@@ -1,5 +1,5 @@
 <template>
-  <div ref="chartContainer" class="org-chart-container">
+  <div ref="chartContainer" class="org-chart-container" :style="{ height: height }">
   </div>
 </template>
 
@@ -73,7 +73,7 @@ export default {
     },
     height: {
       type: String,
-      default: '600px'
+      default: 'fit-content'
     }
   },
   data() {
