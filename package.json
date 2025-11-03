@@ -1,0 +1,35 @@
+{
+  "name": "vue-org-chart-monorepo",
+  "version": "1.0.0",
+  "description": "Vue organization chart component monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter vue-org-chart-demo dev",
+    "build": "pnpm --filter vue-org-chart build",
+    "build:demo": "pnpm --filter vue-org-chart-demo build",
+    "lint": "pnpm -r lint",
+    "type-check": "pnpm -r type-check",
+    "clean": "pnpm -r clean",
+    "preview": "pnpm --filter vue-org-chart-demo preview"
+  },
+  "keywords": [
+    "vue",
+    "organization-chart",
+    "org-chart",
+    "component",
+    "monorepo"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "vite": "^5.0.0",
+    "vue-tsc": "^1.8.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}
