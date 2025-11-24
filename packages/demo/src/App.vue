@@ -63,8 +63,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { OrgChart } from 'vue-org-chart'
-import type { OrgChartNode } from 'vue-org-chart'
+import { OrgChart } from '@org-chart'
+import type { OrgChartNode } from '@org-chart'
 
 const direction = ref<'horizontal' | 'vertical'>('vertical')
 const showAvatar = ref(true)

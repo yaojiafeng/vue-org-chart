@@ -17,6 +17,7 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
+      "@org-chart": ["packages/org-chart/src/index.ts"],
       "@org-chart/*": ["packages/org-chart/src/*"]
     }
   },

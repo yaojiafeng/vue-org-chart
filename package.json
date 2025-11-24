@@ -7,6 +7,7 @@
     "dev": "pnpm --filter vue-org-chart-demo dev",
     "build": "pnpm --filter vue-org-chart build",
     "build:demo": "pnpm --filter vue-org-chart-demo build",
+    "dev:dist": "pnpm --filter vue-org-chart-demo dev:dist",
     "lint": "pnpm -r lint",
     "type-check": "pnpm -r type-check",
     "clean": "pnpm -r clean",
