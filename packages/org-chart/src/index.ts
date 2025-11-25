@@ -1,11 +1,9 @@
 import { App } from 'vue'
-import OrgChart from './components/OrgChart.vue'
-import type { OrgChartProps, OrgChartNode } from './types'
+import OrgChart from './components/index.vue'
 import './style.css'
 
 // 导出组件
 export { OrgChart }
-export type { OrgChartProps, OrgChartNode }
 
 // 导出安装函数
 export function install(app: App) {
@@ -16,6 +14,9 @@ export function install(app: App) {
 export default {
   install,
   OrgChart
+} as {
+  install: (app: App) => void
+  OrgChart: typeof OrgChart
 }
 
 // 支持全局注册

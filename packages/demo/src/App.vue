@@ -7,31 +7,54 @@
           <input
             v-model="direction"
             type="radio"
-            value="vertical"
+            value="t2b"
           />
-          垂直布局
+          从上到下
         </label>
         <label>
           <input
             v-model="direction"
             type="radio"
-            value="horizontal"
+            value="b2t"
           />
-          水平布局
+          从下到上
         </label>
         <label>
           <input
-            v-model="showAvatar"
-            type="checkbox"
+            v-model="direction"
+            type="radio"
+            value="l2r"
           />
-          显示头像
+          从左到右
         </label>
         <label>
           <input
-            v-model="showTitle"
+            v-model="direction"
+            type="radio"
+            value="r2l"
+          />
+          从右到左
+        </label>
+        <label>
+          <input
+            v-model="draggable"
             type="checkbox"
           />
-          显示职位
+          可拖拽
+        </label>
+        <label>
+          <input
+            v-model="zoom"
+            type="checkbox"
+          />
+          可缩放
+        </label>
+        <label>
+          <input
+            v-model="pan"
+            type="checkbox"
+          />
+          可平移
         </label>
       </div>
     </header>
@@ -39,23 +62,13 @@
     <main class="app-main">
       <div class="chart-container">
         <OrgChart
-          :data="orgData"
+          :datasource="orgData"
           :direction="direction"
-          :show-avatar="showAvatar"
-          :show-title="showTitle"
-          @node-click="handleNodeClick"
-          @node-hover="handleNodeHover"
+          :draggable="draggable"
+          :zoom="zoom"
+          :pan="pan"
+          node-content="title"
         />
-      </div>
-
-      <div class="info-panel">
-        <h3>点击的节点信息：</h3>
-        <pre v-if="clickedNode">{{ JSON.stringify(clickedNode, null, 2) }}</pre>
-        <p v-else>点击节点查看信息</p>
-
-        <h3>悬停的节点信息：</h3>
-        <pre v-if="hoveredNode">{{ JSON.stringify(hoveredNode, null, 2) }}</pre>
-        <p v-else>悬停节点查看信息</p>
       </div>
     </main>
   </div>
@@ -64,64 +77,42 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { OrgChart } from '@org-chart'
-import type { OrgChartNode } from '@org-chart'
 
-const direction = ref<'horizontal' | 'vertical'>('vertical')
-const showAvatar = ref(true)
-const showTitle = ref(true)
-const clickedNode = ref<OrgChartNode | null>(null)
-const hoveredNode = ref<OrgChartNode | null>(null)
+const direction = ref<'t2b' | 'b2t' | 'l2r' | 'r2l'>('t2b')
+const draggable = ref(false)
+const zoom = ref(false)
+const pan = ref(false)
 
-const orgData: OrgChartNode = {
+// orgchart 插件需要的数据格式
+const orgData = {
   id: 1,
-  name: '张三',
-  title: 'CEO',
-  avatar: 'https://via.placeholder.com/40x40/409eff/ffffff?text=张',
+  title: '张三 - CEO',
   children: [
     {
       id: 2,
-      name: '李四',
-      title: 'CTO',
-      avatar: 'https://via.placeholder.com/40x40/67c23a/ffffff?text=李',
+      title: '李四 - CTO',
       children: [
         {
           id: 4,
-          name: '王五',
-          title: '前端工程师',
-          avatar: 'https://via.placeholder.com/40x40/e6a23c/ffffff?text=王'
+          title: '王五 - 前端工程师'
         },
         {
           id: 5,
-          name: '赵六',
-          title: '后端工程师',
-          avatar: 'https://via.placeholder.com/40x40/f56c6c/ffffff?text=赵'
+          title: '赵六 - 后端工程师'
         }
       ]
     },
     {
       id: 3,
-      name: '钱七',
-      title: 'CFO',
-      avatar: 'https://via.placeholder.com/40x40/909399/ffffff?text=钱',
+      title: '钱七 - CFO',
       children: [
         {
           id: 6,
-          name: '孙八',
-          title: '财务经理',
-          avatar: 'https://via.placeholder.com/40x40/409eff/ffffff?text=孙'
+          title: '孙八 - 财务经理'
         }
       ]
     }
   ]
-}
-
-const handleNodeClick = (node: OrgChartNode) => {
-  clickedNode.value = node
-  console.log('点击节点:', node)
-}
-
-const handleNodeHover = (node: OrgChartNode) => {
-  hoveredNode.value = node
 }
 </script>
 
@@ -180,36 +171,6 @@ const handleNodeHover = (node: OrgChartNode) => {
   flex: 1;
   background: #f5f7fa;
   overflow: auto;
-}
-
-.info-panel {
-  width: 300px;
-  background: #fff;
-  border-left: 1px solid #e1e5e9;
   padding: 20px;
-  overflow-y: auto;
-}
-
-.info-panel h3 {
-  color: #303133;
-  margin-bottom: 12px;
-  font-size: 14px;
-}
-
-.info-panel pre {
-  background: #f5f7fa;
-  padding: 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  color: #606266;
-  white-space: pre-wrap;
-  word-break: break-all;
-  margin-bottom: 20px;
-}
-
-.info-panel p {
-  color: #909399;
-  font-size: 12px;
-  margin-bottom: 20px;
 }
 </style>
