@@ -36,6 +36,37 @@ interface Icons {
   expanded?: string
 }
 
+// 标准布局方向
+type StandardDirection = 't2b' | 'b2t' | 'l2r' | 'r2l'
+// 布局模式
+type LayoutMode = 'standard' | 'compact'
+
+// Compact 布局连接线配置
+interface CompactLayoutConnectionLine {
+  width?: string | number      // L形连接线宽度，默认: '11px'
+  height?: string | number      // L形连接线垂直部分高度，默认: '56px'
+  offset?: string | number      // 连接线左侧偏移，默认: '-6px'
+  color?: string                // 连接线颜色，默认: '#47A7F3'
+}
+
+// Compact 布局首节点配置
+interface CompactLayoutFirstNode {
+  connectionHeight?: string | number  // 首节点连接线高度，默认: '70px'
+  connectionTop?: string | number     // 首节点连接线顶部偏移，默认: '-14px'
+}
+
+// Compact 布局配置
+interface CompactLayoutConfig {
+  paddingLeft?: string | number       // 根节点左侧偏移，默认: '52%'
+  marginRight?: string | number       // 右侧边距，默认: '92px'
+  nestedPaddingLeft?: string | number // 嵌套层级左侧偏移，默认: '101px'
+  nodeSpacing?: string | number       // 节点垂直间距，默认: '20px' 或 '40px'
+  connectionLine?: CompactLayoutConnectionLine
+  firstNode?: CompactLayoutFirstNode
+  textAlign?: 'left' | 'center' | 'right'  // 文本对齐，默认: 'left'
+  compactFromLevel?: number           // 从第几层开始使用 Compact 布局，默认: 1（所有层级都使用）
+}
+
 interface Props {
   // 组织结构数据源
   datasource: Record<string, any>
@@ -45,8 +76,10 @@ interface Props {
   verticalLevel?: number
   // 可见层级
   visibleLevel?: number
-  // 方向 (t2b, b2t, l2r, r2l)
-  direction?: string
+  // 布局模式：'standard' | 'compact'
+  layoutMode?: LayoutMode
+  // 方向 (t2b, b2t, l2r, r2l)，仅在 standard 模式下有效
+  direction?: StandardDirection
   // 是否可拖拽
   draggable?: boolean
   pan?: boolean
@@ -86,6 +119,8 @@ interface Props {
   icons?: Icons
   // 紧凑模式判断函数
   compact?: (data: Record<string, any>) => boolean
+  // Compact 布局配置（仅在 layoutMode='compact' 时有效）
+  compactLayout?: CompactLayoutConfig
 }
 
 // Props
@@ -93,6 +128,7 @@ const props = withDefaults(defineProps<Props>(), {
   nodeContent: '',
   verticalLevel: undefined,
   visibleLevel: 999,
+  layoutMode: 'standard',
   direction: 't2b',
   draggable: false,
   pan: false,
@@ -158,15 +194,311 @@ const bindEvents = () => {
   })
 }
 
+// 获取布局配置
+const getLayoutConfig = () => {
+  const mode = props.layoutMode || 'standard'
+  const direction = mode === 'standard' 
+    ? (props.direction || 't2b')
+    : undefined
+  
+  return { mode, direction }
+}
+
+// 格式化样式值
+const formatStyleValue = (value: string | number | undefined, defaultValue: string): string => {
+  if (value === undefined || value === null) return defaultValue
+  if (typeof value === 'number') return `${value}px`
+  return String(value)
+}
+
+// 注入 Compact 布局样式
+let compactStyleElement: HTMLStyleElement | null = null
+
+// 清理并重新注入所有 Compact 布局样式
+const injectCompactStyles = (config: CompactLayoutConfig) => {
+  if (!chartContainer.value) return
+  
+  // 创建或获取 style 元素
+  if (!compactStyleElement) {
+    compactStyleElement = document.createElement('style')
+    compactStyleElement.id = 'orgchart-compact-layout-styles'
+    document.head.appendChild(compactStyleElement)
+  }
+  
+  // 清空现有样式
+  compactStyleElement.textContent = ''
+  
+  const styleSheet = compactStyleElement.sheet
+  if (!styleSheet) return
+  
+  // 获取配置值，使用默认值
+  const conn = config.connectionLine || {}
+  const connWidth = formatStyleValue(conn.width, '11px')
+  const connHeight = formatStyleValue(conn.height, '56px')
+  const connOffset = formatStyleValue(conn.offset, '-6px')
+  const connColor = conn.color || '#47A7F3'
+  
+  const first = config.firstNode || {}
+  const firstHeight = formatStyleValue(first.connectionHeight, '70px')
+  const firstTop = formatStyleValue(first.connectionTop, '-14px')
+  
+  // 计算 ::after 的高度（需要根据 ::before 的高度动态计算）
+  const afterHeight = `calc(100% - ${connHeight})`
+  
+  try {
+    // 0. 排除根节点 - 根节点不应该有连接线
+    styleSheet.insertRule(
+      `.orgchart > .nodes > .hierarchy::before,
+       .orgchart > .nodes > .hierarchy::after {
+         content: none !important;
+       }`,
+      styleSheet.cssRules.length
+    )
+    
+    // 1. 基础连接线样式 - ::before 和 ::after 共用（必须保持 border-width: 0 0 1px 1px）
+    // 注意：排除根节点，只应用到子节点
+    styleSheet.insertRule(
+      `.orgchart .nodes.vertical .hierarchy::before,
+       .orgchart .nodes.vertical .hierarchy::after {
+         left: ${connOffset} !important;
+         border-color: ${connColor} !important;
+         border-style: solid !important;
+         border-width: 0 0 1px 1px !important;
+         box-sizing: border-box !important;
+       }`,
+      styleSheet.cssRules.length
+    )
+    
+    // 2. ::before 样式（垂直部分）- 普通节点
+    styleSheet.insertRule(
+      `.orgchart .nodes.vertical .hierarchy::before {
+         top: 0px !important;
+         width: ${connWidth} !important;
+         height: ${connHeight} !important;
+       }`,
+      styleSheet.cssRules.length
+    )
+    
+    // 3. ::after 样式（水平延伸部分）- 普通节点（注意：使用 bottom: 0，不是 top）
+    styleSheet.insertRule(
+      `.orgchart .nodes.vertical .hierarchy::after {
+         bottom: 0 !important;
+         height: ${afterHeight} !important;
+       }`,
+      styleSheet.cssRules.length
+    )
+    
+    // 4. 首节点（第一个子节点）的 ::before 特殊样式
+    // 注意：宽度是 calc(50% + 1px)，只有左边框（border-width: 0px 0 0 1px）
+    styleSheet.insertRule(
+      `.orgchart .nodes.vertical > .hierarchy:first-child::before {
+         top: ${firstTop} !important;
+         height: ${firstHeight} !important;
+         width: calc(50% + 1px) !important;
+         border-width: 0px 0 0 1px !important;
+       }`,
+      styleSheet.cssRules.length
+    )
+    
+    // 5. 首节点的 ::after 特殊样式（注意：使用 top: 56px，不是 bottom: 0）
+    const firstAfterHeight = `calc(100% - ${connHeight})`
+    styleSheet.insertRule(
+      `.orgchart .nodes.vertical > .hierarchy:first-child::after {
+         top: ${connHeight} !important;
+         width: ${connWidth} !important;
+         height: ${firstAfterHeight} !important;
+         border-width: 1px 0 0 1px !important;
+       }`,
+      styleSheet.cssRules.length
+    )
+    
+    // 6. 普通首节点（非根节点第一个子节点）的 ::before
+    styleSheet.insertRule(
+      `.orgchart .nodes.vertical .hierarchy:first-child:not(:only-child)::before {
+         top: ${firstTop} !important;
+         height: ${firstHeight} !important;
+       }`,
+      styleSheet.cssRules.length
+    )
+    
+    // 7. 末节点的 ::after（只有上边框）
+    styleSheet.insertRule(
+      `.orgchart .nodes.vertical .hierarchy:last-child::after {
+         border-width: 1px 0 0 0 !important;
+       }`,
+      styleSheet.cssRules.length
+    )
+    
+    // 8. 首节点且是末节点的情况
+    styleSheet.insertRule(
+      `.orgchart .nodes.vertical > .hierarchy:first-child:last-child::after {
+         border-width: 1px 0 0 0 !important;
+       }`,
+      styleSheet.cssRules.length
+    )
+    
+    // 9. 独子节点的 ::before
+    styleSheet.insertRule(
+      `.orgchart .nodes.vertical .hierarchy:only-child::before {
+         width: ${connWidth} !important;
+       }`,
+      styleSheet.cssRules.length
+    )
+    
+  } catch (e) {
+    console.warn('Failed to inject compact layout styles:', e)
+  }
+}
+
+// 计算节点的层级深度
+// 从 .orgchart 开始，计算 .nodes 的嵌套层级
+// 层级1: .orgchart > .nodes (根节点的直接子节点)
+// 层级2: .orgchart > .nodes > .hierarchy > .nodes
+// 层级3: .orgchart > .nodes > .hierarchy > .nodes > .hierarchy > .nodes
+const getNodeLevel = ($nodes: any, $chart: any): number => {
+  if (!$nodes || !$nodes.length || !$chart || !$chart.length) return 1
+  
+  // 获取根节点的 .nodes
+  const $rootNodes = $chart.find('> .nodes')
+  if (!$rootNodes.length) return 1
+  
+  // 如果是根节点的直接子节点
+  if ($nodes.is($rootNodes)) {
+    return 1
+  }
+  
+  // 计算从根节点到当前节点的层级
+  // 方法：计算从根节点到当前节点之间经过的 .hierarchy 数量
+  let level = 1
+  let $current = $nodes
+  
+  // 向上遍历，计算层级
+  while ($current.length > 0) {
+    // 查找包含当前 .nodes 的父级 .hierarchy
+    // .nodes 的直接父元素是 .hierarchy
+    const $parentHierarchy = $current.parent('.hierarchy')
+    if ($parentHierarchy.length > 0) {
+      // 找到父级 .hierarchy，说明层级+1
+      level++
+      // 查找这个 .hierarchy 所在的父级 .nodes
+      // .hierarchy 的父元素是 .nodes
+      const $parentNodes = $parentHierarchy.parent('.nodes')
+      if ($parentNodes.length > 0) {
+        // 如果父级 .nodes 是根节点，说明已经到达顶层
+        if ($parentNodes.is($rootNodes)) {
+          return level
+        }
+        // 否则继续向上查找
+        $current = $parentNodes
+        continue
+      }
+    }
+    
+    // 如果找不到父级 .hierarchy，说明已经到达根节点或出错
+    break
+  }
+  
+  return level || 1
+}
+
+// 应用布局模式
+const applyLayoutMode = () => {
+  if (!chartContainer.value) return
+  
+  const $container = $(chartContainer.value)
+  const $chart = $container.find('.orgchart')
+  
+  if ($chart.length === 0) return
+  
+  const { mode } = getLayoutConfig()
+  
+  // 查找所有 .nodes 元素（包括嵌套的）
+  const $allNodes = $chart.find('.nodes')
+  
+  if ($allNodes.length === 0) return
+  
+  if (mode === 'compact') {
+    // 应用 Compact 布局配置
+    const config = props.compactLayout || {}
+    const compactFromLevel = config.compactFromLevel ?? 3 // 默认从第1层开始
+    
+    // 先清理所有之前应用的样式，确保从干净的状态开始
+    $allNodes.removeClass('vertical')
+    $allNodes.css({
+      'padding-left': '',
+      'margin-right': '',
+      'text-align': ''
+    })
+    $chart.find('.node').css('margin-bottom', '')
+    
+    // 遍历所有 .nodes，根据层级决定是否应用 Compact 布局
+    $allNodes.each(function(this: HTMLElement) {
+      const $currentNodes = $(this)
+      const level = getNodeLevel($currentNodes, $chart)
+      
+      // 如果层级 >= compactFromLevel，应用 Compact 布局
+      if (level >= compactFromLevel) {
+        $currentNodes.addClass('vertical')
+      }
+    })
+    
+    // 应用根节点样式（只对已经是 vertical 的节点应用）
+    const $rootNodes = $chart.find('> .nodes')
+    if ($rootNodes.length > 0 && $rootNodes.hasClass('vertical')) {
+      if (config.paddingLeft !== undefined) {
+        $rootNodes.css('padding-left', formatStyleValue(config.paddingLeft, '52%'))
+      }
+      if (config.marginRight !== undefined) {
+        $rootNodes.css('margin-right', formatStyleValue(config.marginRight, '92px'))
+      }
+      if (config.textAlign) {
+        $rootNodes.css('text-align', config.textAlign)
+      }
+    }
+    
+    // 应用嵌套节点样式（只对已经是 vertical 的节点应用）
+    const $nestedNodes = $chart.find('.nodes.vertical .nodes.vertical')
+    if ($nestedNodes.length > 0 && config.nestedPaddingLeft !== undefined) {
+      $nestedNodes.css('padding-left', formatStyleValue(config.nestedPaddingLeft, '101px'))
+    }
+    
+    // 应用节点间距（只对已经是 vertical 的节点应用）
+    if (config.nodeSpacing !== undefined) {
+      $chart.find('.nodes.vertical .node').css('margin-bottom', formatStyleValue(config.nodeSpacing, '20px'))
+    }
+    
+    // 应用连接线样式（通过动态注入CSS）
+    // 注意：L型连接线是通过伪元素的 border-width: 0 0 1px 1px 实现的
+    // 必须保持这个属性不变，只修改尺寸、位置和颜色
+    injectCompactStyles(config)
+  } else {
+    // Standard 布局：移除所有 .nodes 的 vertical 类，并清除自定义样式
+    $allNodes.removeClass('vertical')
+    $allNodes.css({
+      'padding-left': '',
+      'margin-right': '',
+      'text-align': ''
+    })
+    $chart.find('.node').css('margin-bottom', '')
+    
+    // 清理注入的 Compact 布局样式
+    if (compactStyleElement) {
+      compactStyleElement.textContent = ''
+    }
+  }
+}
+
 // 初始化图表
 const initOrgChart = (newOptions?: Record<string, any>) => {
   if ($ && $.fn.orgchart && chartContainer.value) {
+    const { direction } = getLayoutConfig()
+    
     const options: Record<string, any> = newOptions || {
       data: props.datasource,
       nodeContent: props.nodeContent,
       verticalLevel: props.verticalLevel,
       visibleLevel: props.visibleLevel,
-      direction: props.direction,
+      direction: direction, // 仅在 standard 模式下使用
       draggable: props.draggable,
       pan: props.pan,
       zoom: props.zoom,
@@ -206,11 +538,29 @@ const initOrgChart = (newOptions?: Record<string, any>) => {
       }
     }
     
+    // 包装 initCompleted 回调，确保在初始化完成后应用布局模式
+    const originalInitCompleted = options.initCompleted
+    options.initCompleted = ($chart: any) => {
+      // 先调用用户自定义的 initCompleted
+      if (originalInitCompleted) {
+        originalInitCompleted($chart)
+      }
+      // 然后应用布局模式
+      nextTick(() => {
+        applyLayoutMode()
+      })
+    }
+    
     // 初始化OrgChart
     chart.value = $(chartContainer.value).orgchart(options)
     
     // 绑定事件
     bindEvents()
+    
+    // 如果图表已经初始化完成，立即应用布局模式（作为备用方案）
+    nextTick(() => {
+      applyLayoutMode()
+    })
   } else {
     console.error('jQuery或OrgChart插件未加载')
   }
@@ -220,6 +570,9 @@ const initOrgChart = (newOptions?: Record<string, any>) => {
 const redraw = () => {
   if (chart.value && chartContainer.value) {
     $(chartContainer.value).empty()
+    initOrgChart()
+  } else if (chartContainer.value) {
+    // 如果图表还未初始化，直接初始化
     initOrgChart()
   }
 }
@@ -262,10 +615,31 @@ watch(
 )
 
 watch(
+  () => props.layoutMode,
+  () => {
+    redraw()
+  }
+)
+
+watch(
   () => props.direction,
   () => {
     redraw()
   }
+)
+
+watch(
+  () => props.compactLayout,
+  () => {
+    // 如果当前是 compact 模式，重新应用布局模式以更新样式
+    if (props.layoutMode === 'compact') {
+      nextTick(() => {
+        console.log('yao compactLayout', props.compactLayout)
+        applyLayoutMode()
+      })
+    }
+  },
+  { deep: true }
 )
 
 watch(
@@ -693,6 +1067,11 @@ onBeforeUnmount(() => {
   if (chart.value && chartContainer.value) {
     chart.value = null
     $(chartContainer.value).empty()
+  }
+  // 清理注入的样式
+  if (compactStyleElement) {
+    compactStyleElement.remove()
+    compactStyleElement = null
   }
 })
 </script>
