@@ -1,5 +1,5 @@
 {
-  "name": "vue-org-chart",
+  "name": "@yxst/vue-org-chart",
   "version": "1.0.0",
   "description": "Vue organization chart component",
   "type": "module",
