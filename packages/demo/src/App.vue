@@ -111,6 +111,7 @@
           :node-content="'department'"
           :node-title="'name'"
           :compact-layout="compactLayoutConfig"
+          :node-template="nodeTemplate"
         />
       </div>
     </main>
@@ -146,6 +147,14 @@ const compactLayoutConfig = ref({
   },
   textAlign: 'left' as const
 })
+
+// 自定义节点模板
+const nodeTemplate = (data: Record<string, any>): string => {
+  return `
+    <div class="title node-name">${data.name || ''}</div>
+    <div class="content node-title">${data.department || ''}</div>
+  `
+}
 
 // 组织结构数据
 const orgData = {
@@ -282,5 +291,70 @@ const orgData = {
   background: #f5f7fa;
   overflow: auto;
   padding: 20px;
+}
+
+/* 自定义节点样式 */
+.orgchart .node .title.node-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 4px 4px 0 0;
+  text-align: center;
+  line-height: 1.4;
+  margin-bottom: 0;
+}
+
+.orgchart .node .content.node-title {
+  font-size: 13px;
+  color: #606266;
+  background: #fff;
+  padding: 8px 12px;
+  border-radius: 0 0 4px 4px;
+  text-align: center;
+  border-top: 1px solid #e4e7ed;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 节点悬停效果 */
+.orgchart .node:hover .title.node-name {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s ease;
+}
+
+.orgchart .node:hover .content.node-title {
+  background: #f5f7fa;
+  border-top-color: #c0c4cc;
+  transition: all 0.3s ease;
+}
+
+/* 节点选中状态 */
+.orgchart .node.selected .title.node-name {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  box-shadow: 0 2px 8px rgba(245, 87, 108, 0.3);
+}
+
+.orgchart .node.selected .content.node-title {
+  background: #fff5f7;
+  border-top-color: #f5576c;
+}
+
+/* 根节点特殊样式 */
+.orgchart > .nodes > .hierarchy > .node .title.node-name {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  font-size: 18px;
+  padding: 12px 16px;
+}
+
+.orgchart > .nodes > .hierarchy > .node .content.node-title {
+  font-size: 14px;
+  padding: 10px 16px;
 }
 </style>
