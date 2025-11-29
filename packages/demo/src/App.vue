@@ -9,17 +9,17 @@
             <input
               v-model="layoutMode"
               type="radio"
-              value="standard"
+              value="compact"
             />
-            标准布局
+            Compact 布局
           </label>
           <label>
             <input
               v-model="layoutMode"
               type="radio"
-              value="compact"
+              value="standard"
             />
-            Compact 布局
+            标准布局
           </label>
         </div>
         <div
@@ -120,7 +120,7 @@
 import { ref } from 'vue'
 import { OrgChart } from '@org-chart'
 
-const layoutMode = ref<'standard' | 'compact'>('standard')
+const layoutMode = ref<'standard' | 'compact'>('compact')
 const direction = ref<'t2b' | 'b2t' | 'l2r' | 'r2l'>('t2b')
 const draggable = ref(false)
 const zoom = ref(false)
