@@ -585,7 +585,7 @@
   box-sizing: border-box;
   content: '';
   position: absolute;
-  left: -6px;
+  left: -8px;
   /* -(background square size + half width of line */
   border-color: #47A7F3;
   border-style: solid;
@@ -617,7 +617,7 @@
 }
 
 .orgchart .nodes.vertical .hierarchy:first-child:before {
-  top: -14px;
+  top: -20px;
   /* 调整回顶部对齐 */
   height: 70px;
 }
@@ -1020,4 +1020,23 @@
 .orgchart .nodes.vertical .hierarchy:first-child {
   margin-top: 0;
   /* 重置顶部边距 */
+}
+
+/* ======================= */
+/* 折叠状态下的父子连线补丁 */
+/* 当后代节点容器被折叠（.nodes.hidden）时，去掉父节点往下的竖线，避免“空线条”残留 */
+/* ======================= */
+
+.orgchart .hierarchy > .node:has(+ .nodes.hidden)::after {
+  content: none !important;
+}
+
+/* ======================= */
+/* Compact 入口层级补丁 */
+/* 当使用 compact 布局时，从 compactFromLevel 指定的层级开始，交由 vertical/compact 连线逻辑处理 */
+/* 在入口层级（.hierarchy.compact-entry）去掉标准布局的向下竖线 */
+/* ======================= */
+
+.orgchart .hierarchy.compact-entry > .node:has(+ .nodes)::after {
+  content: none !important;
 }

@@ -138,12 +138,12 @@ const compactLayoutConfig = ref({
   connectionLine: {
     width: '11px',
     height: '56px',
-    offset: '-6px',
+    offset: '-8px',
     color: '#47A7F3'
   },
   firstNode: {
-    connectionHeight: '70px',
-    connectionTop: '-14px'
+    connectionHeight: '96px',
+    connectionTop: '-40px'
   },
   textAlign: 'left' as const
 })

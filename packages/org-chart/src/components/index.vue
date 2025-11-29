@@ -45,14 +45,14 @@ type LayoutMode = 'standard' | 'compact'
 interface CompactLayoutConnectionLine {
   width?: string | number      // L形连接线宽度，默认: '11px'
   height?: string | number      // L形连接线垂直部分高度，默认: '56px'
-  offset?: string | number      // 连接线左侧偏移，默认: '-6px'
+  offset?: string | number      // 连接线左侧偏移，默认: '-8px'
   color?: string                // 连接线颜色，默认: '#47A7F3'
 }
 
 // Compact 布局首节点配置
 interface CompactLayoutFirstNode {
   connectionHeight?: string | number  // 首节点连接线高度，默认: '70px'
-  connectionTop?: string | number     // 首节点连接线顶部偏移，默认: '-14px'
+  connectionTop?: string | number     // 首节点连接线顶部偏移，默认: '-20px'
 }
 
 // Compact 布局配置
@@ -235,12 +235,12 @@ const injectCompactStyles = (config: CompactLayoutConfig) => {
   const conn = config.connectionLine || {}
   const connWidth = formatStyleValue(conn.width, '11px')
   const connHeight = formatStyleValue(conn.height, '56px')
-  const connOffset = formatStyleValue(conn.offset, '-6px')
+  const connOffset = formatStyleValue(conn.offset, '-8px')
   const connColor = conn.color || '#47A7F3'
   
   const first = config.firstNode || {}
   const firstHeight = formatStyleValue(first.connectionHeight, '70px')
-  const firstTop = formatStyleValue(first.connectionTop, '-14px')
+  const firstTop = formatStyleValue(first.connectionTop, '-20px')
   
   // 计算 ::after 的高度（需要根据 ::before 的高度动态计算）
   const afterHeight = `calc(100% - ${connHeight})`
@@ -420,7 +420,7 @@ const applyLayoutMode = () => {
   if (mode === 'compact') {
     // 应用 Compact 布局配置
     const config = props.compactLayout || {}
-    const compactFromLevel = config.compactFromLevel ?? 3 // 默认从第1层开始
+    const compactFromLevel = config.compactFromLevel ?? 3 // 默认从第3层开始
     
     // 先清理所有之前应用的样式，确保从干净的状态开始
     $allNodes.removeClass('vertical')
@@ -430,6 +430,8 @@ const applyLayoutMode = () => {
       'text-align': ''
     })
     $chart.find('.node').css('margin-bottom', '')
+    // 清理入口层级标记
+    $chart.find('.hierarchy').removeClass('compact-entry')
     
     // 遍历所有 .nodes，根据层级决定是否应用 Compact 布局
     $allNodes.each(function(this: HTMLElement) {
@@ -439,6 +441,15 @@ const applyLayoutMode = () => {
       // 如果层级 >= compactFromLevel，应用 Compact 布局
       if (level >= compactFromLevel) {
         $currentNodes.addClass('vertical')
+      }
+
+      // 记录从第 compactFromLevel 层开始切换为 compact 的“入口层级”，
+      // 用于在该层级去掉标准布局的向下竖线（::after），交给 compact 布局的连线逻辑处理
+      if (level === compactFromLevel) {
+        const $parentHierarchy = $currentNodes.parent('.hierarchy')
+        if ($parentHierarchy.length) {
+          $parentHierarchy.addClass('compact-entry')
+        }
       }
     })
     
