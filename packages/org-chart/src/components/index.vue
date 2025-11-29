@@ -125,7 +125,7 @@ interface Props {
 
 // Props
 const props = withDefaults(defineProps<Props>(), {
-  nodeContent: '',
+  nodeContent: 'content',
   verticalLevel: undefined,
   visibleLevel: 999,
   layoutMode: 'standard',
@@ -137,7 +137,7 @@ const props = withDefaults(defineProps<Props>(), {
   zoomoutLimit: 0.5,
   toggleSiblingsResp: false,
   chartClass: '',
-  nodeTitle: 'name',
+  nodeTitle: 'title',
   parentNodeSymbol: 'oci-menu',
   nodeId: 'id',
   exportButton: false,

@@ -108,8 +108,9 @@
           :draggable="draggable"
           :zoom="zoom"
           :pan="pan"
+          :node-content="'department'"
+          :node-title="'name'"
           :compact-layout="compactLayoutConfig"
-          node-content="title"
         />
       </div>
     </main>
@@ -146,79 +147,56 @@ const compactLayoutConfig = ref({
   textAlign: 'left' as const
 })
 
-// orgchart 插件需要的数据格式
-// 第二层有3个节点，其中一个没有子节点，另外的有子节点，形成对比
+// 组织结构数据
 const orgData = {
   id: 1,
-  title: '张三 - CEO',
+  name: '张三 - CEO',
+  department: '总经理办公室',
   children: [
     {
       id: 2,
-      title: '李四 - CTO',
+      name: '李四 - CTO',
+      department: '总经理办公室',
       children: [
         {
           id: 4,
-          title: '王五 - 前端工程师',
+          name: '王五 - 前端工程师',
+          department: '总经理办公室',
           children: [
-            {
-              id: 10,
-              title: '前端实习生A'
-            },
-            {
-              id: 11,
-              title: '前端实习生B'
-            }
+            { id: 10, name: '前端实习生A', department: '总经理办公室' },
+            { id: 11, name: '前端实习生B', department: '总经理办公室' }
           ]
         },
         {
           id: 5,
-          title: '赵六 - 后端工程师',
+          name: '赵六 - 后端工程师',
+          department: '总经理办公室',
           children: [
-            {
-              id: 12,
-              title: '后端实习生A'
-            }
+            { id: 12, name: '后端实习生A', department: '总经理办公室' }
           ]
         },
-        {
-          id: 7,
-          title: '周九 - 测试工程师'
-        }
+        { id: 7, name: '周九 - 测试工程师', department: '总经理办公室' }
       ]
     },
     {
       id: 3,
-      title: '钱七 - CFO',
+      name: '钱七 - CFO',
+      department: '总经理办公室',
       children: [
         {
           id: 6,
-          title: '孙八 - 财务经理',
+          name: '孙八 - 财务经理',
+          department: '总经理办公室',
           children: [
-            {
-              id: 13,
-              title: '财务助理A'
-            },
-            {
-              id: 14,
-              title: '财务助理B'
-            },
-            {
-              id: 15,
-              title: '财务助理C'
-            }
+            { id: 13, name: '财务助理A', department: '总经理办公室' },
+            { id: 14, name: '财务助理B', department: '总经理办公室' },
+            { id: 15, name: '财务助理C', department: '总经理办公室' }
           ]
         },
-        {
-          id: 8,
-          title: '吴十 - 会计'
-        }
+        { id: 8, name: '吴十 - 会计', department: '总经理办公室' }
       ]
     },
-    {
-      id: 9,
-      title: '郑十一 - COO'
-      // 这个节点没有子节点，用于对比
-    }
+    { id: 9, name: '郑十一 - COO', department: '总经理办公室' }
   ]
 }
 </script>
@@ -282,6 +260,15 @@ const orgData = {
 .controls input[type="radio"],
 .controls input[type="checkbox"] {
   margin: 0;
+}
+
+.controls input[type="text"] {
+  font-size: 14px;
+}
+
+.root-node-editor {
+  background: #e8f4fd;
+  border: 1px solid #b3d8ff;
 }
 
 .app-main {
